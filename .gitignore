@@ -1,0 +1,11 @@
+target/
+my_closet.db
+.DS_Store
+.idea/
+.vscode/
+
+
+# --- Frontend Custom Ignores ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
