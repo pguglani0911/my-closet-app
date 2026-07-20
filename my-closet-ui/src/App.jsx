@@ -157,12 +157,15 @@ function App() {
       .catch(() => setError('Could not update marketplace listing registry target.'));
   };
 
+
   const handleContactSeller = (item) => {
-    const existingChat = conversations.find(c => c.id === item.id);
+    const threadId = `${item.id}_${currentUser}`;
+    const existingChat = conversations.find(c => c.id === threadId);
 
     if (!existingChat) {
       const newChatThread = {
-        id: item.id,
+        id: threadId,
+        itemId: item.id,
         item: item.itemName,
         itemPrice: item.sellingPrice || 0.0,
         buyer: currentUser,
@@ -171,11 +174,13 @@ function App() {
         messages: [],
         date: 'Today',
       };
+
       setConversations(prev => [newChatThread, ...prev]);
     }
 
     setActiveChatId(item.id);
     setCurrentScreen('conversations');
+
   };
 
   const handleSendMockReply = (e) => {
