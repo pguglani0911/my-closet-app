@@ -16,7 +16,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan(basePackages = {"com.closet.app", 
                             "com.closet.controller", 
                             "com.closet.service",
-                            "com.closet.exception"})
+                            "com.closet.exception",
+                            "com.closet.config"})
 @EnableJpaRepositories(basePackages = "com.closet.repository")
 @EntityScan(basePackages = "com.closet.entity")
 public class ClosetApplication {

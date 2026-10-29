@@ -2,6 +2,7 @@ package com.closet.controller;
 
 import com.closet.entity.ClothingItem;
 import com.closet.service.WardrobeService;
+import com.closet.dto.ToggleSaleRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

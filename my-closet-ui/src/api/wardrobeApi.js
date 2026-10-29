@@ -2,29 +2,37 @@ import axios from 'axios';
 
 // Reads from Vite env var if set, otherwise falls back to localhost for local dev.
 // Set VITE_API_BASE_URL in a .env file to point at a different backend (staging, prod, etc).
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/wardrobe';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 const client = axios.create({
   baseURL: BASE_URL,
 });
 
 export const wardrobeApi = {
-  getAll: () => client.get(''),
+  // Fetches all items from the wardrobe
+  getAll: () => client.get('/wardrobe'),
 
-  addItem: (newItem) => client.post('', newItem),
+  // Uploads a clothing item with an image attachment to the multipart backend (/api/items)
+  addItemWithPhoto: (formData) =>
+  client.post('/items', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 
-  deleteItem: (id) => client.delete(`/${id}`),
+  // Legacy JSON add item (if needed elsewhere)
+  addItem: (newItem) => client.post('/wardrobe', newItem),
 
-  wearItem: (id) => client.put(`/${id}/wear`),
+  deleteItem: (id) => client.delete(`/wardrobe/${id}`),
 
-  markToGo: (id) => client.put(`/${id}/markToGo`),
+  wearItem: (id) => client.put(`/wardrobe/${id}/wear`),
 
-  markNotToGo: (id) => client.put(`/${id}/markNotToGo`),
+  markToGo: (id) => client.put(`/wardrobe/${id}/markToGo`),
 
-  // NOTE: toggleSale sends a JSON body (ToggleSaleRequest), not query params —
+  markNotToGo: (id) => client.put(`/wardrobe/${id}/markNotToGo`),
+
+  // NOTE: toggleSale sends a JSON body (ToggleSaleRequest) —
   // this matches the backend's WardrobeController#toggleForSale signature.
   toggleSale: (id, { price, size, user }) =>
-    client.put(`/${id}/toggleSale`, { price, size, user }),
+    client.put(`/wardrobe/${id}/toggleSale`, { price, size, user }),
 };
 
 export default wardrobeApi;

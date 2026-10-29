@@ -1,4 +1,4 @@
-package com.closet.controller;
+package com.closet.dto;
 
 public class ToggleSaleRequest {
     private Double price;

@@ -13,8 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.DecimalMin; 
-import jakarta.persistence.Column;
+import jakarta.validation.constraints.DecimalMin;
 
 
 @Entity
@@ -39,12 +38,11 @@ public class ClothingItem {
     @Column(name = "last_worn")
     private LocalDate lastWorn;
 
+
     @NotNull(message = "Cost cannot be null")
-    @DecimalMin(value = "0.00", message = "Cost cannot be negative") // Changed from @Min to @DecimalMin
+    @DecimalMin(value = "0.00", message = "Cost cannot be negative") 
     @Column(name = "cost", nullable = false, columnDefinition = "REAL CHECK (cost >= 0.00)")
     private Double cost = 0.00;
-
-    
 
     // Default to false. Hibernate maps boolean to INTEGER (0 or 1) in SQLite seamlessly.
     @Column(name = "to_go", nullable = false)
@@ -66,6 +64,14 @@ public class ClothingItem {
     private Double sellingPrice;
     private String size;
 
+    // Stores the reference ID linking to CouchDB documents & image attachments
+    @Column(name = "couch_doc_id")
+    private String couchDocId;
+
+    // Stores the permanent proxy URL pointing to the image stream
+    @Column(name = "image_url")
+    private String imageUrl;
+
     // --- JPA Lifecycle Hook ---
     @PrePersist
     protected void onCreate() {
@@ -73,12 +79,6 @@ public class ClothingItem {
         this.added = LocalDate.now();
     }
 
-
-
-
-    
-
-   
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -95,7 +95,7 @@ public class ClothingItem {
     public void setLastWorn(LocalDate lastWorn) { this.lastWorn = lastWorn; }
     
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-        public Double getCost() {
+    public Double getCost() {
         return this.cost;
     }
 
@@ -112,7 +112,6 @@ public class ClothingItem {
     public String getClothingType() { return clothingType; }
     public void setClothingType(String clothingType) { this.clothingType = clothingType; }
 
-
     public boolean isForSale() { return forSale != null && forSale;}
     public void setForSale(boolean forSale) { this.forSale = forSale; }
 
@@ -125,7 +124,8 @@ public class ClothingItem {
     public String getSize() { return size; }
     public void setSize(String size) { this.size = size; }
 
-
+    public String getCouchDocId() { return couchDocId; }
+    public void setCouchDocId(String couchDocId) { this.couchDocId = couchDocId; }
 
     @JsonProperty("itemValue")
     public String getFormattedItemValue() {
@@ -138,19 +138,14 @@ public class ClothingItem {
                         .toString();
     }
 
-
-
-    @JsonProperty("cost") // Forces Jackson to name this key "cost" in the final JSON output
+    @JsonProperty("cost")
     public String getFormattedCost() {
         if (this.cost == null) return "0.00";
     
-    // Pure Truncation (Chops off trailing numbers to stay 8.99 like in your screenshot)
         return BigDecimal.valueOf(this.cost)
                      .setScale(2, RoundingMode.HALF_UP)
                      .toString();
     }
-
-
 
     @OneToMany(mappedBy = "clothingItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
@@ -166,4 +161,7 @@ public class ClothingItem {
     public List<WardrobeTag> getTags() { return tags; }
     public void setTags(List<WardrobeTag> tags) { this.tags = tags; }
 
-}
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+} 

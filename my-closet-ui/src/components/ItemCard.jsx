@@ -41,6 +41,8 @@ function ItemCard({
       style={cardStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
     >
       {showSizeBadge && (
         <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#26192b', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', zIndex: 10 }}>
@@ -48,9 +50,9 @@ function ItemCard({
         </div>
       )}
 
-      {item.image ? (
+      {item.imageUrl ? (
         <div style={{ width: '100%', height: variant === 'closet' ? '180px' : '160px', backgroundColor: '#fff' }}>
-          <img src={item.image} alt={item.itemName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={item.imageUrl} alt={item.itemName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       ) : (
         <div style={{ width: '100%', height: variant === 'closet' ? '180px' : '160px', backgroundColor: '#eaeaea', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#888' }}>
@@ -58,8 +60,8 @@ function ItemCard({
         </div>
       )}
 
-      {variant === 'closet' && isHovered && (
-        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '6px', zIndex: 10 }}>
+      {variant === 'closet' && (
+        <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '6px', zIndex: 10, opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}>
           <button onClick={(e) => onWear(e, item)} style={{ background: '#26192b', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>＋ Wear</button>
           <button onClick={(e) => onToggleSale(e, item)} style={{ background: item.forSale ? '#e84118' : '#4cd137', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
             {item.forSale ? '🏷️ Delist' : '🏷️ Sell'}
