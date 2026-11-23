@@ -9,6 +9,8 @@ import com.closet.exception.*;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -133,6 +135,8 @@ public class WardrobeService {
 
 
     public List<ClothingItem> getAllItemsSorted(String sortBy, String direction) {
+        List<ClothingItem> allWardrobeItems ;
+  
         // 1. Fallback defaults if parameters are empty
         if (sortBy == null || sortBy.trim().isEmpty()) {
             sortBy = "id"; // Default sort by database ID
@@ -161,7 +165,15 @@ public class WardrobeService {
         Sort sortOrder = Sort.by(sortDirection, sortBy);
 
         // 5. Pass the sort settings directly to Spring Data's built-in findAll method
-        return wardrobeRepository.findAll(sortOrder);
+        allWardrobeItems = wardrobeRepository.findAll(sortOrder);
+        if (allWardrobeItems.isEmpty()) {
+            throw new ResourceNotFoundException("Sorry! You don't have any items in your closet!");
+        }
+        else {
+            return allWardrobeItems;
+        }
+
+
     }
 
 

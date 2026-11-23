@@ -20,6 +20,7 @@ function ItemCard({
   onContactSeller,
 }) {
   const [isHovered, setIsHovered] = useState(false);
+  console.trace(`ItemCard image for "${item.itemName}":`, item.imageUrl);
 
   const cardStyle = {
     border: '1px solid #51588c',
@@ -52,7 +53,7 @@ function ItemCard({
 
       {item.imageUrl ? (
         <div style={{ width: '100%', height: variant === 'closet' ? '180px' : '160px', backgroundColor: '#fff' }}>
-          <img src={item.imageUrl} alt={item.itemName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src="fucked up" alt={item.itemName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       ) : (
         <div style={{ width: '100%', height: variant === 'closet' ? '180px' : '160px', backgroundColor: '#eaeaea', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#888' }}>

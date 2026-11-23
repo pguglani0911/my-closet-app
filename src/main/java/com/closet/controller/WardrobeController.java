@@ -3,18 +3,26 @@ package com.closet.controller;
 import com.closet.entity.ClothingItem;
 import com.closet.service.WardrobeService;
 import com.closet.dto.ToggleSaleRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/wardrobe")
 public class WardrobeController {
 
+    private static final Logger log = LoggerFactory.getLogger(WardrobeController.class);
+
     private final WardrobeService wardrobeService;
+
+
 
     public WardrobeController(WardrobeService wardrobeService) {
         this.wardrobeService = wardrobeService;
@@ -52,11 +60,17 @@ public class WardrobeController {
         return ResponseEntity.ok(wardrobeService.getItemsByType(type));
     }
 
-    @PostMapping
+   /**  @PostMapping
     public ResponseEntity<ClothingItem> addItem(@Valid @RequestBody ClothingItem newItem) {
-        ClothingItem savedItem = wardrobeService.addItem(newItem);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
+        try {
+            ClothingItem savedItem = wardrobeService.addItem(newItem);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
+        } catch (RuntimeException e) {
+            log.error("Error adding item '{}'", newItem.getItemName(), e);
+            throw e; // let GlobalExceptionHandler build the HTTP response
+        }
     }
+        */
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteItem(@PathVariable Long id) {

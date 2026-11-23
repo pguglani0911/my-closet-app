@@ -23,10 +23,16 @@ public class CouchDbConfig {
     public RestClient couchRestClient() {
         String authHeader = "Basic " + Base64.getEncoder()
                 .encodeToString((username + ":" + password).getBytes());
-
-        return RestClient.builder()
-                .baseUrl(couchUrl)
-                .defaultHeader("Authorization", authHeader)
-                .build();
+                 System.out.print("");
+        try {
+            return RestClient.builder()
+                    .baseUrl(couchUrl)
+                    .defaultHeader("Authorization", authHeader)
+                    .build();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
     }
 }

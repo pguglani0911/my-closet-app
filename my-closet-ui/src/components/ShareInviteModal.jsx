@@ -9,6 +9,8 @@ function ShareInviteModal({ onClose }) {
   const [invite, setInvite] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
 
   const inputStyle = { 
     width: '100%', 
@@ -20,14 +22,10 @@ function ShareInviteModal({ onClose }) {
     fontSize: '14px' 
   };
 
-  useEffect(() => {
+ useEffect(() => {
     configApi.getSetting('invite_expiration_days')
-      .then(res => {
-        setDefaultDays(res.data.settingValue);
-      })
-      .catch(() => {
-        setDefaultDays('7'); // Fallback display if request fails
-      });
+      .then(res => setDefaultDays(res.data.settingValue))
+      .catch(() => setDefaultDays('7')); // Matches the backend default if the setting is missing
   }, []);
 
   const handleGenerate = async () => {

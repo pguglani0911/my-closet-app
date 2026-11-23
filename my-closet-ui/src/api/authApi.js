@@ -10,7 +10,7 @@ const client = axios.create({
 });
 
 export const authApi = {
-  validateInvite: (code) => client.get(`/invites/${code}/validate`), // <--- Updated route
+  validateInvite: (code) => client.get(`/invites/${encodeURIComponent(code)}/validate`),
   signup: (payload) => client.post('/auth/signup', payload),
   login: (creds) => client.post('/auth/login', creds),
   listPending: () => client.get('/admin/users?status=PENDING'),

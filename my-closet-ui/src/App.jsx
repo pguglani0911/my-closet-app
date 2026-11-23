@@ -123,6 +123,7 @@ function App() {
       formData.append('tags', tagsInput);
     }
 
+    console.log('Uploading item:', { itemName, currentUser, file: selectedFile.name, bytes: selectedFile.size });
     wardrobeApi.addItemWithPhoto(formData)
       .then(response => {
         setItems(prev => [...prev, response.data]);
@@ -134,8 +135,13 @@ function App() {
         fetchItems();
       })
       .catch(err => {
-        setError(err.response?.data?.message || 'Failed to save new clothing item.');
-      });
+        // Debug: shows the real status and server response in the browser console (Cmd+Option+J)
+        const errorMsg = typeof err.response?.data === 'string'
+        ? err.response.data
+        : err.response?.data?.message;
+
+      setError(errorMsg || 'Failed to save new clothing item.');
+          });
   };
 
   const handleIncrementFrequency = (e, item) => {

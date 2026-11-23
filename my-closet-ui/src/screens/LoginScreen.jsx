@@ -18,10 +18,13 @@ function LoginScreen({ onLoginSuccess, onCreateAccount }) {
       onLoginSuccess(res.data); // { username, role }
     } catch (err) {
       const status = err.response?.status;
+      
       if (status === 403) {
         setError(`Account not yet active (${err.response.data.status?.toLowerCase() || 'pending'}).`);
+      } else if (status == 500) {
+        setError('Internal server error. Please try again later.' + status);
       } else {
-        setError('Invalid username or password.');
+        setError('Invalid username or password.'+status);
       }
     } finally {
       setSubmitting(false);
