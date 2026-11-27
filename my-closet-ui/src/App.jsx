@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import wardrobeApi from './api/wardrobeApi';
+import authApi from './api/authApi';
 import Sidebar from './components/Sidebar';
 import AddItemModal from './components/AddItemModal';
 import LoginScreen from './screens/LoginScreen';
@@ -67,6 +68,9 @@ function App() {
   const [replyText, setReplyText] = useState('');
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  //misc working on logout
+  const [submitting, setSubmitting] = useState(false);
 
   // Sync auth state to localStorage
   useEffect(() => {
@@ -263,15 +267,52 @@ function App() {
     setCurrentScreen('closet');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    setError(null);
+    setSubmitting(true);
     // 1. Purge stored session
-    localStorage.removeItem('wardrobe_user');
+    //localStorage.removeItem('wardrobe_user');
+    console.info("prior to authApi.logout");
+    try {
+      console.info("in the try catch for authApi.logout");
+      const res = await authApi.logout();
+      console.info("called authApi.logout");
+
+    } catch (err){
+      const status = err.response?.status;
+      if (status == 500) {
+        setError('Internal server error. Please try again later.' + status);
+        console.info("error with logout + 500");
+      } else if (status == 401) {
+        setError('Unauthorized. ');
+        console.info("error with logout + 401");
+      } else if (status === 403) {
+        setError(`Account not yet active (${err.response.data.status?.toLowerCase() || 'pending'}).`);
+        console.info("error with logout + 403");
+      } else if (status == 400) {
+        setError('Bad request. Please check your input and try again.');
+        console.info("error with logout + 400");
+      } else if (status == 404) {
+        setError('Not found. Please check the resource and try again.');
+        console.info("error with logout + 404");
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+        console.info("error with logout + unexpected");
+      }
+
+    } finally {
+      localStorage.removeItem('wardrobe_user');
+      setSubmitting(false);
+    }
+
     
     // 2. Clear state variables
     setLoggedInUser(null);
     setCurrentUser('');
     setAuthStage('login');
     setCurrentScreen('closet');
+    
+
   };
 
 

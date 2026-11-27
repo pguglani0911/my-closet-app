@@ -5,9 +5,11 @@ import com.closet.entity.User;
 import com.closet.exception.ResourceNotFoundException;
 import com.closet.repository.InviteRepository;
 import com.closet.repository.UserRepository;
+
 import com.closet.service.SignupService;
 import com.closet.service.SessionService;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,54 +55,104 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body, HttpServletRequest request) {
-       Optional<User> user = null;
+        String username = body.get("username");
+        String password = body.get("password");
 
-        try {
-             user = userRepo.findById(body.get("username"));
-             if (user.isEmpty()) {
-                return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(" Invalid username or password");
-             }
-            log.info("User found: {}", user);
-
-            if (!passwordEncoder.matches(body.get("password"), user.get().getPassword())) {
-                return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
-            }
-            if (!"ACTIVE".equals(user.get().getAccountStatus())) {
-                return ResponseEntity.status(403).body(Map.of(
-                    "error", "Account not active",
-                    "status", user.get().getAccountStatus()
-                ));
-            }
-
-            HttpSession session = request.getSession(true);// create a new session
-             /// Create a ClosetUserSession Object - Create a DTO
-             ///// 
-            
-             
-             String strSessionTrue = session.getId();
-              log.info("Session ID: New  {}", strSessionTrue);
-             String ip_address= request.getRemoteAddr();
-                String user_agent = request.getHeader("User-Agent");
-             sessionService.createSession(user.get().getUsername(),strSessionTrue, strSessionTrue, ip_address, user_agent);
-        } catch (Exception e) {
-            //ResourceNotFoundException rnfe;
-            //rnfe = new ResourceNotFoundException("Invalid credentials");
-            throw e;
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
         }
-       
+
+        Optional<User> userOpt = userRepo.findById(username);
+        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid credentials"));
+        }
+
+        User user = userOpt.get();
+        log.info("Login attempt for user: {}", user.getUsername());
+
+        if (!"ACTIVE".equals(user.getAccountStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "Account not active",
+                    "status", user.getAccountStatus()
+            ));
+        }
+
+        HttpSession oldSession = request.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
+        HttpSession session = request.getSession(true);
+
+        // Mark this session as authenticated
+        session.setAttribute("username", user.getUsername());
+        session.setAttribute("role", user.getRole());
+
+        String sessionId = session.getId();
+        log.info("New session created for user: {}", user.getUsername());
+
+        String ipAddress = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        sessionService.createSession(user.getUsername(), sessionId, sessionId, ipAddress, userAgent);
+
+        return ResponseEntity.ok(Map.of(
+                "username", user.getUsername(),
+                "role", user.getRole()
+        ));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout( HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            log.warn("Logout attempted with no active session");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "No active session"));
+        }
+        String sessionId = session.getId();
+        log.info("Processing logout for session {}", sessionId);
+
+        Object username = session.getAttribute("username");
+        log.info("Username found for session {}: {}", sessionId, username);
 
         
-        return ResponseEntity.ok(Map.of("username", user.get().getUsername(), "role", user.get().getRole()));
-    }
+        try {
+            
+            log.info("Username found: {}", username);
+            if (username != null) {
+                sessionService.setSessionToInactive((String) username);
+            }
 
-    @PostMapping("/signup")
-    public User signup(@Valid @RequestBody SignupRequest req) {
-        return signupService.signup(req);
-    }
-
-
-
+            try {
+                session.invalidate();
+            } catch (IllegalStateException e) {
+                log.warn("Session {} was already invalidated during logout", session.getId(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Invalid session state"));
+            }
   
+            log.info("User {} logged out successfully", username);
+            
+        } catch (DataAccessException e) {
+            log.error("Database error while marking session inactive for user {}", username, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Unable to complete logout due to a server error"));
+        } catch (ClassCastException e) {
+            log.error("Invalid username attribute type in session", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Invalid session state"));
+        } catch (Exception e) {
+            log.error("Unexpected error during logout", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Logout failed"));
+        }
+        
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
+    }
+
+
+
+
 }

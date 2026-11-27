@@ -20,7 +20,7 @@ public class SessionService {
     @Transactional
     public Session createSession(String username, String tokenHash, String csrfToken,
                                  String ipAddress, String userAgent) {
-        Session session = new Session(username, tokenHash, csrfToken, ipAddress, userAgent,"active");
+        Session session = new Session(username, tokenHash, csrfToken, ipAddress, userAgent,"ACTIVE");
         
         return sessionRepository.save(session);
     }
@@ -38,5 +38,20 @@ public class SessionService {
     @Transactional
     public void deleteSession(Long id) {
         sessionRepository.deleteById(id);
+    }
+
+    @Transactional 
+    public boolean isSessionValid(String sessionId, String username) {
+        return sessionRepository.existsByTokenHashAndUsernameAndActivityStatus(sessionId, username,"ACTIVE");
+    }
+
+    @Transactional 
+    public void setSessionToInactive(String username) {
+        sessionRepository.setSessionToInactive(username);
+    }
+    
+    @Transactional 
+    public boolean existsByTokenHashAndUsernameAndActivityStatus(String tokenHash, String username, String activityStatus) {
+        return sessionRepository.existsByTokenHashAndUsernameAndActivityStatus(tokenHash, username, activityStatus);
     }
 }

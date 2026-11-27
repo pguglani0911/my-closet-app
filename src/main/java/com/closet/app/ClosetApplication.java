@@ -34,7 +34,8 @@ public class ClosetApplication {
                 registry.addMapping("/api/**") // Applies to all routes starting with /api
                         .allowedOrigins("http://localhost:5173") // Your Vite dev port
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

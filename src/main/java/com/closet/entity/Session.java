@@ -59,16 +59,11 @@ public class Session {
         this.userAgent = userAgent;
         this.activityStatus = activityStatus;
     }
-
-
-    
-
-  
-
     
     
     public Long getId() { return id; }
     public String getUsername() { return username; }
+    
     public String getTokenHash() { return tokenHash; }
     public String getStartTime() { return startTime; }
     public String getLastActiveAt() { return lastActiveAt; }
@@ -78,6 +73,13 @@ public class Session {
     public String getUserAgent() { return userAgent; }
     public String getCsrfToken() { return csrfToken; }
     public String getActivityStatus() { return activityStatus; }
+    public String getActivityStatus(String status ) { 
+        String actStat = "INACTIVE";
+        if (activityStatus.equals(status)) {
+        actStat= activityStatus  ;
+        } 
+        return actStat;
+    }
 
 
     public void setLastActiveAt(String lastActiveAt) { this.lastActiveAt = lastActiveAt; }

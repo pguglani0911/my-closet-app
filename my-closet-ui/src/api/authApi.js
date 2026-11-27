@@ -7,6 +7,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const client = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
 });
 
 export const authApi = {
@@ -17,6 +18,7 @@ export const authApi = {
   approve: (username) => client.put(`/admin/users/${username}/approve`),
   deny: (username, reason) => client.put(`/admin/users/${username}/deny`, { reason }),
   createInvite: (payload) => client.post('/invites', payload),
+  logout: () => client.get('/auth/logout'),
 };
 
 export default authApi;

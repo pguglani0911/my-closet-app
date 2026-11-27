@@ -21,6 +21,8 @@ function LoginScreen({ onLoginSuccess, onCreateAccount }) {
       
       if (status === 403) {
         setError(`Account not yet active (${err.response.data.status?.toLowerCase() || 'pending'}).`);
+      } else if (status == 405) {
+        setError('Method not allowed. Please check your request.' + status);
       } else if (status == 500) {
         setError('Internal server error. Please try again later.' + status);
       } else {
